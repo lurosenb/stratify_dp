@@ -1,0 +1,46 @@
+{
+    "fairman2019marijuana":[
+       "SEX",
+       "RACE",
+       "YEAR"
+    ],
+    "texas":[
+       "SEX",
+       "RAC1P",
+       "DPHY"
+    ],
+    "lee2021ability":[
+       "sex",
+       "race",
+       "SES"
+    ],
+    "pierce2019who":[
+       "sex",
+       "age_category"
+    ],
+    "assari2019baseline":[
+       "Race",
+       "Gender",
+       "Age"
+    ],
+    "fruiht2018naturally":[
+       "RACE",
+       "BIO_SEX",
+       "AGE_YEARS",
+       "EDU_ATTAINED_BINARY"
+    ],
+    "iverson22football":[
+       
+    ],
+    "fire":[
+       "Zipcode of Incident"
+    ],
+    "jeong2021math":[
+       "RACE_GROUP"
+    ],
+    "saw2018cross":[
+       "sex",
+       "race",
+       "SES"
+    ]
+ }
