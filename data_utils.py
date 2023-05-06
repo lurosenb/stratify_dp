@@ -82,7 +82,7 @@ def get_scenario(scenario):
         raise ValueError("Not supported: " + scenario)
 
 def get_employment():
-    acs = ACSData(states=['CA'])
+    acs = ACSData(states=['NY'])
     pd_all_data, pd_features, pd_target, pd_group = acs.return_simple_acs_data_scenario(scenario="ACSEmployment")
     return pd_all_data, pd_features, pd_target, pd_group
 

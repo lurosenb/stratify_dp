@@ -37,7 +37,7 @@ class ACSData:
         pd_group = pd.DataFrame(group, columns = [scenario._group])
         return pd_all_data, pd_features, pd_target, pd_group
 
-    def return_simple_acs_data_scenario(self, scenario="ACSEmployment", subsample=None, verbose=False):
+    def return_simple_acs_data_scenario(self, scenario="ACSEmployment", subsample=None, verbose=False, bucket_age=True, bucket_school=True):
         """
         "Simple scenarios" are defined as just categorical (f_types=[0])
         """
@@ -55,10 +55,23 @@ class ACSData:
         if pd_group.columns[0] not in allowed_features:
             allowed_features.append(pd_group.columns[0])
         
-        remove_features = [f for f in pd_all_data.columns if f not in allowed_features]
+        save_features = []
+        if bucket_age:
+            save_features += ['AGEP']
+        if bucket_school:
+            save_features += ['SCHL']
+        
+        remove_features = [f for f in pd_all_data.columns if f not in allowed_features + save_features]
+
         print(remove_features)
         pd_all_data = pd_all_data.drop(remove_features, axis=1)
         pd_features = pd_features.drop(remove_features, axis=1)
+
+        if bucket_age:
+            pd_all_data['AGEP'] = pd.cut(pd_all_data['AGEP'], bins=5, labels=False)
+
+        if bucket_school:
+            pd_all_data['SCHL'] = pd.cut(pd_all_data['SCHL'], bins=5, labels=False)
 
         return pd_all_data, pd_features, pd_target, pd_group
     

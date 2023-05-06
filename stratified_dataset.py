@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class StratifiedDataset:
     
@@ -72,3 +73,115 @@ class StratifiedDataset:
                 self.num_to_cat[col] = dict(enumerate(df[col].cat.categories))
                 df[col] = df[col].cat.codes
         return df
+    
+class StratifiedSynthesizer:
+    def __init__(self, synthesizer_class, kwargs=None, epsilon=1.0, smallest_strata=0.001):
+        self.synthesizer_class = synthesizer_class
+        self.smallest_strata = smallest_strata
+        self.strata_synthesizers = None
+        self.epsilon = epsilon
+        self.kwargs = kwargs
+
+    def fit(self, df, strata_cols=None, categorical_columns=None):
+        self.strata_cols = strata_cols
+        self.categorical_columns = categorical_columns
+
+        # Fit normally if no strata_cols are provided
+        if self.strata_cols is None:
+            self.stratified_dataset = None
+            if self.kwargs is None:
+                synth = self.synthesizer_class(epsilon=self.epsilon)
+            else:
+                synth = self.synthesizer_class(epsilon=self.epsilon, **self.kwargs)
+            synth.fit(df)
+            self.strata_synthesizers = [synth]
+            return self
+        
+        # Fit on each stratum
+        self.stratified_dataset = StratifiedDataset(df, self.strata_cols, 
+                                                    smallest_strata=self.smallest_strata, 
+                                                    categorical_columns=self.categorical_columns)
+        self.strata_synthesizers = []
+        for strata_df in self.stratified_dataset.get_strata_dfs(limit_size=True):
+            print('Fitting synthesizer on strata with size', strata_df.shape[0])
+            if self.kwargs is None:
+                synth = self.synthesizer_class(epsilon=self.epsilon)
+            else:
+                synth = self.synthesizer_class(epsilon=self.epsilon, **self.kwargs)
+            synth.fit(strata_df)
+            self.strata_synthesizers.append(synth)
+        return self
+
+    def sample(self, n_samples):
+        assert self.strata_synthesizers is not None, 'Synthesizer not fitted'
+        # Sample normally if no strata_cols are provided
+        if self.stratified_dataset is None:
+            return self.strata_synthesizers[0].sample(n_samples)
+        
+        # Sample from each stratum proportionally
+        samples = []
+        for strata_df, synthesizer in zip(self.stratified_dataset.get_strata_dfs(limit_size=True), self.strata_synthesizers):
+            n = int(n_samples * strata_df.shape[0] / self.stratified_dataset.df.shape[0])
+            samples.append(synthesizer.sample(n))
+        return pd.concat(samples)
+    
+class ParallelStratifiedSynthesizer:
+    def __init__(self, synthesizer_class, kwargs=None, epsilon=1.0, smallest_strata=0.001):
+        self.synthesizer_class = synthesizer_class
+        self.smallest_strata = smallest_strata
+        self.strata_synthesizers = None
+        self.epsilon = epsilon
+        self.kwargs = kwargs
+
+    def fit_synthesizer_on_stratum(self, strata_df):
+        print('Fitting synthesizer on strata with size', strata_df.shape[0])
+        if self.kwargs is None:
+            synth = self.synthesizer_class(epsilon=self.epsilon)
+        else:
+            synth = self.synthesizer_class(epsilon=self.epsilon, **self.kwargs)
+        synth.fit(strata_df)
+        return synth
+
+    def fit(self, df, strata_cols=None, categorical_columns=None):
+        self.strata_cols = strata_cols
+        self.categorical_columns = categorical_columns
+
+        # Fit normally if no strata_cols are provided
+        if self.strata_cols is None:
+            self.stratified_dataset = None
+            if self.kwargs is None:
+                synth = self.synthesizer_class(epsilon=self.epsilon)
+            else:
+                synth = self.synthesizer_class(epsilon=self.epsilon, **self.kwargs)
+            synth.fit(df)
+            self.strata_synthesizers = [synth]
+            return self
+        
+        # Fit on each stratum
+        self.stratified_dataset = StratifiedDataset(df, self.strata_cols, 
+                                                    smallest_strata=self.smallest_strata, 
+                                                    categorical_columns=self.categorical_columns)
+        self.strata_synthesizers = []
+        
+        # Parallelize the fitting process
+        with ThreadPoolExecutor() as executor:
+            futures = [executor.submit(self.fit_synthesizer_on_stratum, strata_df) for strata_df in self.stratified_dataset.get_strata_dfs(limit_size=True)]
+            
+            for future in as_completed(futures):
+                synthesizer = future.result()
+                self.strata_synthesizers.append(synthesizer)
+
+        return self
+
+    def sample(self, n_samples):
+        assert self.strata_synthesizers is not None, 'Synthesizer not fitted'
+        # Sample normally if no strata_cols are provided
+        if self.stratified_dataset is None:
+            return self.strata_synthesizers[0].sample(n_samples)
+        
+        # Sample from each stratum proportionally
+        samples = []
+        for strata_df, synthesizer in zip(self.stratified_dataset.get_strata_dfs(limit_size=True), self.strata_synthesizers):
+            n = int(n_samples * strata_df.shape[0] / self.stratified_dataset.df.shape[0])
+            samples.append(synthesizer.sample(n))
+        return pd.concat(samples)

@@ -3,3 +3,6 @@ stratified_datasets.pkl
 public_stratified_datasets.pkl
 __pycache__
 .ipynb_checkpoints
+models
+models_backup
+save
