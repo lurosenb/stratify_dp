@@ -8,3 +8,4 @@ models_backup
 save
 secret.json
 token.json
+service_secret.json

@@ -6,19 +6,23 @@ from email.mime.multipart import MIMEMultipart
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from email.mime.text import MIMEText
+from google.oauth2 import service_account
 import base64
 
 def send_email(subject, body, to):
     # Set up Gmail API credentials
     SCOPES = ['https://www.googleapis.com/auth/gmail.send']
-    CLIENT_SECRET_FILE = 'secret.json'
+    # CLIENT_SECRET_FILE = 'secret.json'
+    SERVICE_ACCOUNT_FILE = 'service_secret.json'
     
     # Load saved credentials or obtain new ones
     creds = None
     try:
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        # creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
     except FileNotFoundError:
-        flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
+        # flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
+        flow = InstalledAppFlow.from_client_secrets_file(SERVICE_ACCOUNT_FILE, SCOPES)
         creds = flow.run_local_server(port=0)
 
         # Save the credentials for the next run
