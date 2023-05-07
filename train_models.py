@@ -86,12 +86,13 @@ for seed in [0, 1, 2, 3, 4]:
         for epsilon in epsilons:
             start = time.time()
             print(f"Training vanilla Synthesizer with {synth_class.__name__} and epsilon = {epsilon}")
-            try:
-                fit_vanilla_model(synth_class, epsilon, df, seed)
-            except Exception as e:
-                print(e)
-                failure_message = f"Failed to fit vanilla Synthesizer with {synth_class.__name__} with epsilon = {epsilon}"
-                failure_response(failure_message, seed)
+            # try:
+            fit_vanilla_model(synth_class, epsilon, df, seed)
+            # except Exception as e:
+                # print(e)
+                # failure_message = f"Failed to fit vanilla Synthesizer with {synth_class.__name__} with epsilon = {epsilon}"
+                # failure_message += "\n" + str(e)
+                # failure_response(failure_message, seed)
 
             for combination in list(combinations):
                 strata_cols = list(combination)
@@ -120,6 +121,7 @@ for seed in [0, 1, 2, 3, 4]:
                     print(f"Model saved as {model_filename}")
                 except:
                     failure_message = f"Failed to fit ParallelStratifiedSynthesizer with {synth_class.__name__} with epsilon = {epsilon} and strata_cols = {strata_cols}"
+                    failure_message += "\n" + str(e)
                     failure_response(failure_message, seed)
             
             end = time.time()

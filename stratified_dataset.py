@@ -60,8 +60,7 @@ class StratifiedDataset:
             else:
                 strata_dfs.append(strata)
         if remove_strata_index:
-            for strata_df in strata_dfs:
-                strata_df.drop('strata_index', axis=1, inplace=True)
+            strata_dfs = [strata_df.drop('strata_index', axis=1) for strata_df in strata_dfs]
         return strata_dfs
     
     def force_data_categorical_to_numeric(self, df, cat_columns=[]):
@@ -183,5 +182,7 @@ class ParallelStratifiedSynthesizer:
         samples = []
         for strata_df, synthesizer in zip(self.stratified_dataset.get_strata_dfs(limit_size=True), self.strata_synthesizers):
             n = int(n_samples * strata_df.shape[0] / self.stratified_dataset.df.shape[0])
+            # NOTE: we have to ensure that n is at least 1, otherwise error
+            n = max(n, 1)
             samples.append(synthesizer.sample(n))
         return pd.concat(samples)
