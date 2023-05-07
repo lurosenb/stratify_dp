@@ -1,0 +1,11 @@
+google-auth 
+google-auth-oauthlib
+google-api-python-client
+smartnoise-synth
+scikit-learn
+pandas
+numpy
+matplotlib
+seaborn
+tqdm
+folktables

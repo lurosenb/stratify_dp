@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 from stratified_dataset import ParallelStratifiedSynthesizer
@@ -6,15 +5,23 @@ import dill
 from data_utils import get_employment
 import itertools
 import os
-from IPython.display import clear_output
+import time
 
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report
 
 from snsynth.mst import MSTSynthesizer
 from snsynth.aim import AIMSynthesizer
 from gem_synthesizer import GEMSynthesizer
+
+from send_emails import send_email
+
+import warnings
+warnings.filterwarnings('ignore')
+
+### Set random seed
+seed = 0
+np.random.seed(seed)
+###
 
 all_data, features, target, group = get_employment()
 
@@ -40,8 +47,8 @@ if not os.path.exists(log_path):
     with open(log_filename, "w") as file:
         file.write("")
 
-def fit_vanilla_model(model, epsilon, df):
-    model_filename = f"models/{model.__name__}_epsilon_{epsilon}.dill"
+def fit_vanilla_model(model, epsilon, df, seed):
+    model_filename = f"models/{model.__name__}_epsilon_{epsilon}_seed_{seed}.dill"
     
     model_path = os.path.join(os.getcwd(), model_filename)
     if os.path.exists(model_path):
@@ -53,22 +60,31 @@ def fit_vanilla_model(model, epsilon, df):
     with open(model_filename, "wb") as file:
         dill.dump(m, file)
 
+def failure_response(failure_message, seed):
+    # Add to a log that we failed to fit this model
+    with open(log_filename, "a") as file:
+        file.write(failure_message + "\n")
+    
+    subject = f"Model Training Failed (seed = {seed})"
+    # Add time to the log
+    body = failure_message + "\n" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    send_email(subject, body, log_email_target)
+
 synthesizers = [MSTSynthesizer, AIMSynthesizer, GEMSynthesizer] #, MSTSynthesizer, AIMSynthesizer]
 
 # Epsilon values to try
-epsilons = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
+epsilons = [0.01]#, 0.05, 0.1, 0.5, 1.0, 5.0]
 
+log_email_target = "lr2872@nyu.edu"
 for synth_class in synthesizers:
     for epsilon in epsilons:
         print(f"Training vanilla Synthesizer with {synth_class.__name__} and epsilon = {epsilon}")
         try:
             assert True == False
-            fit_vanilla_model(MSTSynthesizer, epsilon, df)
+            fit_vanilla_model(MSTSynthesizer, epsilon, df, seed)
         except:
-            print(f"Failed to fit vanilla Synthesizer with {synth_class.__name__} with epsilon = {epsilon}")
-            # Add to a log that we failed to fit this model
-            with open(log_filename, "a") as file:
-                file.write(f"Failed to fit vanilla Synthesizer with {synth_class.__name__} with epsilon = {epsilon}\n")
+            failure_message = f"Failed to fit vanilla Synthesizer with {synth_class.__name__} with epsilon = {epsilon}"
+            failure_response(failure_message, seed)
 
         for combination in list(combinations):
             strata_cols = list(combination)
@@ -76,15 +92,13 @@ for synth_class in synthesizers:
             print(f"Training ParallelStratifiedSynthesizer with {synth_class.__name__} and epsilon = {epsilon}")
 
             name_combo = str("_".join(combination))
-            model_filename = f"models/{synth_class.__name__}_epsilon_{epsilon}_{name_combo}.dill"
+            model_filename = f"models/{synth_class.__name__}_epsilon_{epsilon}_{name_combo}_seed_{seed}.dill"
             
             # Check if the model file already exists, and if so, skip training and pickling
             model_path = os.path.join(os.getcwd(), model_filename)
             if os.path.exists(model_path):
                 print(f"Model {model_filename} already exists. Skipping.")
                 continue
-
-            clear_output(wait=True)
 
             # Split the dataframe into train set
             train_df, _ = train_test_split(df, test_size=0.2, random_state=42)
@@ -99,9 +113,7 @@ for synth_class in synthesizers:
                 
                 print(f"Model saved as {model_filename}")
             except:
-                print(f"Failed to fit ParallelStratifiedSynthesizer with {synth_class.__name__} with epsilon = {epsilon} and strata_cols = {strata_cols}")
-                # Add to a log that we failed to fit this model
-                with open(log_filename, "a") as file:
-                    file.write(f"Failed to fit ParallelStratifiedSynthesizer with {synth_class.__name__} with epsilon = {epsilon} and strata_cols = {strata_cols}\n")
+                failure_message = f"Failed to fit ParallelStratifiedSynthesizer with {synth_class.__name__} with epsilon = {epsilon} and strata_cols = {strata_cols}"
+                failure_response(failure_message, seed)
 
 print("All models trained and pickled.")

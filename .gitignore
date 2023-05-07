@@ -6,3 +6,5 @@ __pycache__
 models
 models_backup
 save
+secret.json
+token.json
