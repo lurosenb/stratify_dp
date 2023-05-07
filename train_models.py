@@ -76,10 +76,10 @@ for seed in [0, 1, 2, 3, 4]:
         body = failure_message + "\n" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         send_email(subject, body, log_email_target)
 
-    synthesizers = [MSTSynthesizer, AIMSynthesizer, GEMSynthesizer] #, MSTSynthesizer, AIMSynthesizer]
+    synthesizers = [GEMSynthesizer] #, MSTSynthesizer, AIMSynthesizer]
 
     # Epsilon values to try
-    epsilons = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
+    epsilons = [0.01]#, 0.05, 0.1, 0.5, 1.0, 5.0]
 
     log_email_target = "lr2872@nyu.edu"
     for synth_class in synthesizers:
@@ -87,8 +87,9 @@ for seed in [0, 1, 2, 3, 4]:
             start = time.time()
             print(f"Training vanilla Synthesizer with {synth_class.__name__} and epsilon = {epsilon}")
             try:
-                fit_vanilla_model(MSTSynthesizer, epsilon, df, seed)
-            except:
+                fit_vanilla_model(synth_class, epsilon, df, seed)
+            except Exception as e:
+                print(e)
                 failure_message = f"Failed to fit vanilla Synthesizer with {synth_class.__name__} with epsilon = {epsilon}"
                 failure_response(failure_message, seed)
 
