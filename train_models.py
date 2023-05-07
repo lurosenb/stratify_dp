@@ -60,12 +60,18 @@ def fit_vanilla_model(model, epsilon, df, seed):
     with open(model_filename, "wb") as file:
         dill.dump(m, file)
 
+def completion_email(synth_class, seed, epsilon, time_elapsed):
+    subject = f"COMPLETE: Training for Synth (seed = {seed}, epsilon = {epsilon})"
+    body = f"Model training complete for {synth_class.__name__} with seed = {seed}, epsilon = {epsilon}, and time elapsed = {time_elapsed} seconds."
+    body += "\n" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    send_email(subject, body, log_email_target)
+
 def failure_response(failure_message, seed):
     # Add to a log that we failed to fit this model
     with open(log_filename, "a") as file:
         file.write(failure_message + "\n")
     
-    subject = f"Model Training Failed (seed = {seed})"
+    subject = f"FAILURE: Model Training Failed (seed = {seed})"
     # Add time to the log
     body = failure_message + "\n" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     send_email(subject, body, log_email_target)
@@ -73,14 +79,14 @@ def failure_response(failure_message, seed):
 synthesizers = [MSTSynthesizer, AIMSynthesizer, GEMSynthesizer] #, MSTSynthesizer, AIMSynthesizer]
 
 # Epsilon values to try
-epsilons = [0.01]#, 0.05, 0.1, 0.5, 1.0, 5.0]
+epsilons = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
 
 log_email_target = "lr2872@nyu.edu"
 for synth_class in synthesizers:
     for epsilon in epsilons:
+        start = time.time()
         print(f"Training vanilla Synthesizer with {synth_class.__name__} and epsilon = {epsilon}")
         try:
-            assert True == False
             fit_vanilla_model(MSTSynthesizer, epsilon, df, seed)
         except:
             failure_message = f"Failed to fit vanilla Synthesizer with {synth_class.__name__} with epsilon = {epsilon}"
@@ -103,7 +109,6 @@ for synth_class in synthesizers:
             # Split the dataframe into train set
             train_df, _ = train_test_split(df, test_size=0.2, random_state=42)
             try:
-                assert True == False
                 stratified_synth = ParallelStratifiedSynthesizer(synth_class, epsilon=epsilon)
                 stratified_synth.fit(df, strata_cols=strata_cols, categorical_columns=df.columns)
 
@@ -115,5 +120,8 @@ for synth_class in synthesizers:
             except:
                 failure_message = f"Failed to fit ParallelStratifiedSynthesizer with {synth_class.__name__} with epsilon = {epsilon} and strata_cols = {strata_cols}"
                 failure_response(failure_message, seed)
+        
+        end = time.time()
+        completion_email(synth_class, seed, epsilon, end - start)
 
 print("All models trained and pickled.")
