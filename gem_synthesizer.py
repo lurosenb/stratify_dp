@@ -179,7 +179,7 @@ class GEMSynthesizer(Synthesizer):
         self.query_manager_torch = KWayMarginalQMTorch(data, workloads, verbose=True, device=self.device)
         true_answers_torch = self.query_manager_torch.get_answers(data)
 
-        self.G = NeuralNetworkGenerator(self.query_manager_torch, K=1000, device=self.device, init_seed=0,
+        self.G = NeuralNetworkGenerator(self.query_manager_torch, K=1000, query_bs=1000, device=self.device, init_seed=0,
                            embedding_dim=512, gen_dims=None, resample=False)
         
         self.algo = GEM(self.G, self.T, self.epsilon,
