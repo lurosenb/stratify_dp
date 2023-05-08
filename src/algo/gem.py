@@ -124,11 +124,13 @@ class IterAlgoGEMBase(IterativeAlgorithmTorch):
             scores = (true_answers - syn_answers).abs()
             self.record_errors(true_answers, syn_answers)
 
+            # if ((t + 1) % self.save_interval == 0) or (t + 1 > self.T - self.save_num):
+            #     self.save('epoch_{}_'+str(self.id)+'.pt'.format(t + 1))
             if ((t + 1) % self.save_interval == 0) or (t + 1 > self.T - self.save_num):
-                self.save('epoch_{}_'+str(self.id)+'.pt'.format(t + 1))
-            # if np.min(self.true_max_errors) == self.true_max_errors[-1]:
-            #     self.save('best.pt')
-            # self.save('last.pt')
+                self.save('epoch_{}.pt'.format(t + 1))
+            if np.min(self.true_max_errors) == self.true_max_errors[-1]:
+                self.save('best.pt')
+            self.save('last.pt')
 
             if self.schedulerG is not None:
                 self.schedulerG.step()

@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from stratified_dataset import ParallelStratifiedSynthesizer
+from stratified_dataset import ParallelStratifiedSynthesizer, StratifiedSynthesizer
 import dill
 from data_utils import get_employment
 import itertools
@@ -111,8 +111,12 @@ for seed in [0, 1, 2, 3, 4]:
                 # Split the dataframe into train set
                 train_df, _ = train_test_split(df, test_size=0.2, random_state=42)
                 try:
-                    stratified_synth = ParallelStratifiedSynthesizer(synth_class, epsilon=epsilon)
-                    stratified_synth.fit(df, strata_cols=strata_cols, categorical_columns=df.columns)
+                    if synth_class.__name__ != 'GEMSynthesizer':
+                        stratified_synth = ParallelStratifiedSynthesizer(synth_class, epsilon=epsilon)
+                        stratified_synth.fit(df, strata_cols=strata_cols, categorical_columns=df.columns)
+                    else:
+                        stratified_synth = StratifiedSynthesizer(synth_class, epsilon=epsilon)
+                        stratified_synth.fit(df, strata_cols=strata_cols, categorical_columns=df.columns)
 
                     # Pickle the trained model
                     with open(model_filename, "wb") as file:

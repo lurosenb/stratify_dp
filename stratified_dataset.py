@@ -121,6 +121,8 @@ class StratifiedSynthesizer:
         samples = []
         for strata_df, synthesizer in zip(self.stratified_dataset.get_strata_dfs(limit_size=True), self.strata_synthesizers):
             n = int(n_samples * strata_df.shape[0] / self.stratified_dataset.df.shape[0])
+            # NOTE: we have to ensure that n is at least 1, otherwise error
+            n = max(n, 1)
             samples.append(synthesizer.sample(n))
         return pd.concat(samples)
     
