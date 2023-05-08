@@ -76,7 +76,7 @@ for seed in [0, 1, 2, 3, 4]:
         body = failure_message + "\n" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         send_email(subject, body, log_email_target)
 
-    synthesizers = [GEMSynthesizer] #, MSTSynthesizer, AIMSynthesizer]
+    synthesizers = [MSTSynthesizer] #, MSTSynthesizer, AIMSynthesizer] GEMSynthesizer
 
     # Epsilon values to try
     epsilons = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
