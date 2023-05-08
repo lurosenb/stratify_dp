@@ -112,9 +112,11 @@ for seed in [0, 1, 2, 3, 4]:
                 train_df, _ = train_test_split(df, test_size=0.2, random_state=42)
                 try:
                     if synth_class.__name__ != 'GEMSynthesizer':
+                        print('here')
                         stratified_synth = ParallelStratifiedSynthesizer(synth_class, epsilon=epsilon)
                         stratified_synth.fit(df, strata_cols=strata_cols, categorical_columns=df.columns)
                     else:
+                        print('there')
                         stratified_synth = StratifiedSynthesizer(synth_class, epsilon=epsilon)
                         stratified_synth.fit(df, strata_cols=strata_cols, categorical_columns=df.columns)
 
