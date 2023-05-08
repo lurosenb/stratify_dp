@@ -136,9 +136,9 @@ class IterativeAlgorithm(ABC):
 
 class IterativeAlgorithmTorch(IterativeAlgorithm):
     def __init__(self, G, T, eps0,
-                 alpha=0.5, default_dir=None, verbose=False, seed=None):
+                 alpha=0.5, default_dir=None, verbose=False, seed=None, id=0):
         super().__init__(G, T, eps0,
-                         alpha=alpha, default_dir=default_dir, verbose=verbose, seed=seed)
+                         alpha=alpha, default_dir=default_dir, verbose=verbose, seed=seed, id=0)
         self.device = self.G.device
 
         # convert these lists into tensors for Pytorch code

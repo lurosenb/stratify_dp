@@ -119,7 +119,7 @@ for seed in [0, 1, 2, 3, 4]:
                         dill.dump(stratified_synth, file)
                     
                     print(f"Model saved as {model_filename}")
-                except:
+                except Exception as e:
                     failure_message = f"Failed to fit ParallelStratifiedSynthesizer with {synth_class.__name__} with epsilon = {epsilon} and strata_cols = {strata_cols}"
                     failure_message += "\n" + str(e)
                     failure_response(failure_message, seed)
