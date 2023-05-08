@@ -44,6 +44,9 @@ class IterAlgoGEMBase(IterativeAlgorithmTorch):
         if self.eta_min is not None:
             self.schedulerG = optim.lr_scheduler.CosineAnnealingLR(self.optimizerG, self.T, eta_min=self.eta_min)
 
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.G = self.G.to(self.device)
+
     def _valid_qm(self):
         return (KWayMarginalQM)
 
@@ -53,7 +56,7 @@ class IterAlgoGEMBase(IterativeAlgorithmTorch):
         self.ema_error = self.ema_beta * self.ema_error + (1 - self.ema_beta) * error
 
     def _get_loss(self, idxs):
-        errors = self._get_sampled_query_errors(idxs=idxs)
+        errors = self._get_sampled_query_errors(idxs=idxs).to(self.device)
         loss = torch.norm(errors, p=self.loss_p) / len(errors)
         return loss
 
@@ -70,8 +73,8 @@ class IterAlgoGEMBase(IterativeAlgorithmTorch):
             optimizer.zero_grad()
 
             with torch.no_grad():
-                errors = self._get_sampled_query_errors().abs()
-            idxs = torch.arange(len(errors))
+                errors = self._get_sampled_query_errors().abs().to(self.device)
+            idxs = torch.arange(len(errors)).to(self.device)
 
             # above THRESHOLD
             mask = errors >= threshold
@@ -92,6 +95,7 @@ class IterAlgoGEMBase(IterativeAlgorithmTorch):
         return loss, step
 
     def fit(self, true_answers):
+        true_answers = true_answers.to(self.device)
         if self.verbose:
             print("Fitting to query answers...")
         self.optimizerG.step() # just to avoid warning
@@ -141,7 +145,7 @@ class IterAlgoGEMBase(IterativeAlgorithmTorch):
         weights = {}
         k_array = np.arange(self.save_num)[::-1]
         for i in k_array:
-            self.load('epoch_{}.pt'.format(self.T - i))
+            self.load('epoch_{}.pt'.format(self.T - i), map_location=self.device)
             w = self.G.generator.state_dict()
             for key in w.keys():
                 if key not in weights.keys():
