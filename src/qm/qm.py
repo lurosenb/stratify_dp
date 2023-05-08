@@ -239,7 +239,7 @@ class KWayMarginalQMTorch(KWayMarginalQM):
         super()._setup_queries()
         self.queries = torch.tensor(self.queries).long().to(self.device)
 
-    def get_answers_helper(self, data_onehot, weights, query_idxs=None, batch_size=1000, verbose=False):
+    def get_answers_helper(self, data_onehot, weights, query_idxs=None, batch_size=100, verbose=False):
         queries = self.queries
         if query_idxs is not None:
             queries = queries[query_idxs]
@@ -261,7 +261,7 @@ class KWayMarginalQMTorch(KWayMarginalQM):
         return answers
 
     # Currently (torch=1.11.0), torch.histogramdd doesn't support CUDA operations (rewrite below if support is added)
-    def get_answers(self, data, weights=None, by_workload=False, density=True, batch_size=1000):
+    def get_answers(self, data, weights=None, by_workload=False, density=True, batch_size=100):
         if self.verbose:
             print("Calculating query answers...")
 
@@ -318,7 +318,7 @@ class KWayMarginalAggQMTorch(KWayMarginalQMTorch):
 
         self.num_queries = len(self.agg_mapping)
 
-    def get_answers_helper(self, data_onehot, weights, query_idxs=None, batch_size=1000, verbose=False):
+    def get_answers_helper(self, data_onehot, weights, query_idxs=None, batch_size=100, verbose=False):
         agg_mapping = self.agg_mapping
         if query_idxs is not None:
             agg_mapping = agg_mapping[query_idxs]
