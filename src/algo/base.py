@@ -26,7 +26,7 @@ class IterativeAlgorithm(ABC):
         errors: TODO: perhaps we should write a separate class for logging/keeping track of errors?
     """
     def __init__(self, G, T, eps0,
-                 alpha=0.5, default_dir=None, verbose=False, seed=None):
+                 alpha=0.5, default_dir=None, verbose=False, seed=None, id=0):
         assert 0 <= alpha <= 1, "alpha must be between 0 and 1"
 
         self.G = G
@@ -48,6 +48,8 @@ class IterativeAlgorithm(ABC):
         self.past_workload_idxs = [] # only used for sensitivity trick implementations
         self.past_query_idxs = []
         self.past_measurements = []
+
+        self.id = id
 
         # validate QueryManager is correct
         assert isinstance(self.qm, self._valid_qm()), \

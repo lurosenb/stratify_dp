@@ -14,10 +14,10 @@ class IterAlgoGEMBase(IterativeAlgorithmTorch):
                  loss_p=1, lr=1e-4, eta_min=1e-5, max_idxs=100, max_iters=100,
                  ema_beta=0.5, ema_error_factor=0.5,
                  ema_weights=True, ema_weights_beta=0.9,
-                 save_interval=10, save_num=None,
+                 save_interval=10, save_num=None, id=0
                  ):
         super().__init__(G, T, eps0, alpha=alpha,
-                         default_dir=default_dir, verbose=verbose, seed=seed)
+                         default_dir=default_dir, verbose=verbose, seed=seed, id=id)
         # learning parameters
         self.loss_p = loss_p
         self.lr = lr
@@ -125,7 +125,7 @@ class IterAlgoGEMBase(IterativeAlgorithmTorch):
             self.record_errors(true_answers, syn_answers)
 
             if ((t + 1) % self.save_interval == 0) or (t + 1 > self.T - self.save_num):
-                self.save('epoch_{}.pt'.format(t + 1))
+                self.save('epoch_{}_'+str(self.id)+'.pt'.format(t + 1))
             # if np.min(self.true_max_errors) == self.true_max_errors[-1]:
             #     self.save('best.pt')
             # self.save('last.pt')

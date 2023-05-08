@@ -85,12 +85,13 @@ class GEMSynthesizer(Synthesizer):
                  T=100,
                  recycle=True,
                  synth_kwargs=dict(), 
-                 verbose=False):
+                 verbose=False, id=0):
         self.synth_kwargs = synth_kwargs
         self.verbose = verbose
         self.k = k
         self.T = T
         self.recycle = recycle
+        self.id = id
 
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         super().__init__(epsilon, slide_range, thresh)
@@ -185,7 +186,7 @@ class GEMSynthesizer(Synthesizer):
         self.algo = GEM(self.G, self.T, self.epsilon,
            alpha=0.67, default_dir=None, verbose=True, seed=0,
            loss_p=2, lr=1e-4, max_idxs=100, max_iters=100,
-           ema_weights=True, ema_weights_beta=0.9)
+           ema_weights=True, ema_weights_beta=0.9, id=self.id)
 
         self.algo.fit(true_answers_torch)
 
