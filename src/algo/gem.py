@@ -45,7 +45,6 @@ class IterAlgoGEMBase(IterativeAlgorithmTorch):
             self.schedulerG = optim.lr_scheduler.CosineAnnealingLR(self.optimizerG, self.T, eta_min=self.eta_min)
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.G = self.G.to(self.device)
 
     def _valid_qm(self):
         return (KWayMarginalQM)
