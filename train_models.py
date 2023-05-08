@@ -110,25 +110,25 @@ for seed in [0, 1, 2, 3, 4]:
 
                 # Split the dataframe into train set
                 train_df, _ = train_test_split(df, test_size=0.2, random_state=42)
-                try:
-                    if synth_class.__name__ != 'GEMSynthesizer':
-                        print('here')
-                        stratified_synth = ParallelStratifiedSynthesizer(synth_class, epsilon=epsilon)
-                        stratified_synth.fit(df, strata_cols=strata_cols, categorical_columns=df.columns)
-                    else:
-                        print('there')
-                        stratified_synth = StratifiedSynthesizer(synth_class, epsilon=epsilon)
-                        stratified_synth.fit(df, strata_cols=strata_cols, categorical_columns=df.columns)
+                # try:
+                if synth_class.__name__ != 'GEMSynthesizer':
+                    print('here')
+                    stratified_synth = ParallelStratifiedSynthesizer(synth_class, epsilon=epsilon)
+                    stratified_synth.fit(df, strata_cols=strata_cols, categorical_columns=df.columns)
+                else:
+                    print('there')
+                    stratified_synth = StratifiedSynthesizer(synth_class, epsilon=epsilon)
+                    stratified_synth.fit(df, strata_cols=strata_cols, categorical_columns=df.columns)
 
-                    # Pickle the trained model
-                    with open(model_filename, "wb") as file:
-                        dill.dump(stratified_synth, file)
-                    
-                    print(f"Model saved as {model_filename}")
-                except Exception as e:
-                    failure_message = f"Failed to fit ParallelStratifiedSynthesizer with {synth_class.__name__} with epsilon = {epsilon} and strata_cols = {strata_cols}"
-                    failure_message += "\n" + str(e)
-                    failure_response(failure_message, seed)
+                # Pickle the trained model
+                with open(model_filename, "wb") as file:
+                    dill.dump(stratified_synth, file)
+                
+                print(f"Model saved as {model_filename}")
+                # except Exception as e:
+                #     failure_message = f"Failed to fit ParallelStratifiedSynthesizer with {synth_class.__name__} with epsilon = {epsilon} and strata_cols = {strata_cols}"
+                #     failure_message += "\n" + str(e)
+                #     failure_response(failure_message, seed)
             
             end = time.time()
             completion_email(synth_class, seed, epsilon, end - start)
