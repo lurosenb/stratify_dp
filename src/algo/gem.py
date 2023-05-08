@@ -144,7 +144,7 @@ class IterAlgoGEMBase(IterativeAlgorithmTorch):
         weights = {}
         k_array = np.arange(self.save_num)[::-1]
         for i in k_array:
-            self.load('epoch_{}.pt'.format(self.T - i), map_location=self.device)
+            self.load('epoch_{}.pt'.format(self.T - i))
             w = self.G.generator.state_dict()
             for key in w.keys():
                 if key not in weights.keys():
