@@ -131,10 +131,13 @@ class ParallelStratifiedSynthesizer:
         self.strata_synthesizers = None
         self.epsilon = epsilon
         self.kwargs = kwargs
+        
 
-    def fit_synthesizer_on_stratum(self, strata_df):
+    def fit_synthesizer_on_stratum(self, strata_df, s_id):
         print('Fitting synthesizer on strata with size', strata_df.shape[0])
-        if self.kwargs is None:
+        if self.synthesizer_class.__name__ == 'GEMSynthesizer':
+            synth = self.synthesizer_class(epsilon=self.epsilon, id=s_id)
+        elif self.kwargs is None:
             synth = self.synthesizer_class(epsilon=self.epsilon)
         else:
             synth = self.synthesizer_class(epsilon=self.epsilon, **self.kwargs)
@@ -164,7 +167,7 @@ class ParallelStratifiedSynthesizer:
         
         # Parallelize the fitting process
         with ThreadPoolExecutor() as executor:
-            futures = [executor.submit(self.fit_synthesizer_on_stratum, strata_df) for strata_df in self.stratified_dataset.get_strata_dfs(limit_size=True)]
+            futures = [executor.submit(self.fit_synthesizer_on_stratum, strata_df, s_id) for s_id, strata_df in enumerate(self.stratified_dataset.get_strata_dfs(limit_size=True))]
             
             for future in as_completed(futures):
                 synthesizer = future.result()
