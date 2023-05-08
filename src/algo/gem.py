@@ -8,6 +8,9 @@ from src.qm import KWayMarginalQM
 from src.algo.base import IterativeAlgorithmTorch
 from src.utils.mechanisms import exponential_mech, gaussian_mech
 
+import os
+import shutil
+
 class IterAlgoGEMBase(IterativeAlgorithmTorch):
     def __init__(self, G, T, eps0,
                  alpha=0.5, default_dir=None, verbose=False, seed=None,
@@ -45,6 +48,12 @@ class IterAlgoGEMBase(IterativeAlgorithmTorch):
             self.schedulerG = optim.lr_scheduler.CosineAnnealingLR(self.optimizerG, self.T, eta_min=self.eta_min)
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+        # clear the default directory
+        if os.path.exists(self.default_dir):
+            shutil.rmtree(self.default_dir)
+        os.makedirs(self.default_dir)
+        
 
     def _valid_qm(self):
         return (KWayMarginalQM)
@@ -146,7 +155,7 @@ class IterAlgoGEMBase(IterativeAlgorithmTorch):
         weights = {}
         k_array = np.arange(self.save_num)[::-1]
         for i in k_array:
-            self.load('epoch_{}_'+str(self.id)+'.pt'.format(self.T - i))
+            self.load('epoch_{}.pt'.format(self.T - i))
             w = self.G.generator.state_dict()
             for key in w.keys():
                 if key not in weights.keys():
