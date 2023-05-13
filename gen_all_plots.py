@@ -5,7 +5,7 @@ from snsynth.mst import MSTSynthesizer
 from snsynth.aim import AIMSynthesizer
 from gem_synthesizer import GEMSynthesizer
 import dill
-from data_utils import get_employment
+from helpers.data_utils import get_employment
 import itertools
 import os
 from IPython.display import clear_output
@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
 
-from send_emails import send_email
+from helpers.send_emails import send_email
 import time
 
 import warnings

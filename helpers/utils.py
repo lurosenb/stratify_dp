@@ -1,7 +1,5 @@
 import numpy as np
 import pandas as pd
-import pyro
-import pyro.distributions as dist
 from matplotlib import pyplot as plt
 import seaborn as sns
 import math
@@ -247,3 +245,10 @@ def toy_plot_for_mean_mixture(
     plt.show()
 
 ########
+
+def calculate_dimensionality(df):
+    dimensionality = 1
+    for col in df.columns:
+        unique_values = df[col].nunique()
+        dimensionality *= unique_values
+    return dimensionality

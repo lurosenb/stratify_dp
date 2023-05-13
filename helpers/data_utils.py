@@ -7,7 +7,7 @@ import sklearn.metrics as skm
 from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from acs_helper import ACSData
+from helpers.acs_helper import ACSData
 
 def resample_up_down(dataframe, upsample=True, target_col="ESR", seed=0):
     # Separate majority and minority classes
@@ -120,3 +120,11 @@ def get_public_class(state="NM"):
 def get_public(state="NY"):
     acs = ACSData(states=[state])
     return acs.acs_data
+
+
+def calculate_dimensionality(df):
+    dimensionality = 1
+    for col in df.columns:
+        unique_values = df[col].nunique()
+        dimensionality *= unique_values
+    return dimensionality
