@@ -320,7 +320,7 @@ import time
 warnings.filterwarnings('ignore')
 seed = 1
 
-synthesizers = [MSTSynthesizer, GEMSynthesizer]
+synthesizers = [AIMSynthesizer]
 epsilons = [0.01, 0.05, 0.1, 0.5, 1.0, 5.0]
 omega = 1/12 # (1/k is the default value in the paper)
 strata_cols = ['SEX', 'RAC1P']
@@ -419,7 +419,7 @@ def generate_performance_plots(real_train_df, real_test_df, combinations, synthe
             if (i % 50) == 0:
                 step_email(i)
 
-    performance_df.to_pickle('new_performance.pkl')
+    performance_df.to_pickle('aim_performance.pkl')
 
     return performance_df
 
