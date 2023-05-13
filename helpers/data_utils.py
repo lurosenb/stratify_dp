@@ -128,3 +128,11 @@ def calculate_dimensionality(df):
         unique_values = df[col].nunique()
         dimensionality *= unique_values
     return dimensionality
+
+def force_data_categorical_to_numeric(df, cat_columns=[]):
+    # convert columns to categorical if they are not already
+    for col in cat_columns:
+        if col in df.columns:
+            df[col] = df[col].astype('category')
+            df[col] = df[col].cat.codes
+    return df

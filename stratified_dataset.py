@@ -123,7 +123,14 @@ class StratifiedSynthesizer:
             n = int(n_samples * strata_df.shape[0] / self.stratified_dataset.df.shape[0])
             # NOTE: we have to ensure that n is at least 1, otherwise error
             n = max(n, 1)
-            samples.append(synthesizer.sample(n))
+            # Sample synthetic data
+            synthetic_data = synthesizer.sample(n)
+
+            # Copy protected attribute values from the original strata to the synthetic data
+            for col in self.strata_cols:
+                synthetic_data[col] = strata_df[col].values[0]
+
+            samples.append(synthetic_data)
         return pd.concat(samples)
     
 class ParallelStratifiedSynthesizer:
@@ -189,5 +196,12 @@ class ParallelStratifiedSynthesizer:
             n = int(n_samples * strata_df.shape[0] / self.stratified_dataset.df.shape[0])
             # NOTE: we have to ensure that n is at least 1, otherwise error
             n = max(n, 1)
-            samples.append(synthesizer.sample(n))
+            # Sample synthetic data
+            synthetic_data = synthesizer.sample(n)
+
+            # Copy protected attribute values from the original strata to the synthetic data
+            for col in self.strata_cols:
+                synthetic_data[col] = strata_df[col].values[0]
+
+            samples.append(synthetic_data)
         return pd.concat(samples)
